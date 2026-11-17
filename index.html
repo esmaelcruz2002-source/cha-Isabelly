@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chá De Casa Nova Isabelly</title>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     
@@ -16,7 +16,7 @@
             background-color: var(--cor-principal); 
             color: white; 
             text-align: center; 
-            padding: 100px 20px; 
+            padding: 80px 20px 60px; 
             background-image: 
                 linear-gradient(to bottom, rgba(109, 76, 65, 0.85), rgba(109, 76, 65, 0.7)), 
                 url('biblia.jpeg'), 
@@ -29,10 +29,38 @@
             z-index: 1; 
         }
 
-        @media print { header, .btn-voltar, .submit-btn, .nav-btn, h2, .versiculo-final, .warning-box, .welcome-text { display: none !important; } body { background: white; } .container { box-shadow: none; border: none; margin: 0; padding: 0; min-height: auto; } #thank-you-card { border: 2px solid #000; break-inside: avoid; } }
+        @media print { header, .btn-voltar, .submit-btn, .nav-btn, h2, .versiculo-final, .warning-box, .welcome-text, .countdown-box, .event-info { display: none !important; } body { background: white; } .container { box-shadow: none; border: none; margin: 0; padding: 0; min-height: auto; } #thank-you-card { border: 2px solid #000; break-inside: avoid; } }
 
         h1 { font-family: 'Playfair Display', serif; font-size: 3.5em; margin: 0; font-weight: 700; letter-spacing: 1px; text-shadow: 2px 2px 15px rgba(0,0,0,0.9); }
         .welcome-text { font-size: 1.25em; max-width: 800px; margin: 20px auto; font-weight: 400; text-shadow: 1px 1px 8px rgba(0,0,0,0.9); line-height: 1.8; }
+        
+        /* INFORMAÇÕES DO EVENTO E CONTADOR */
+        .event-info {
+            margin: 20px auto;
+            padding: 15px;
+            max-width: 90%;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        .event-info p { margin: 5px 0; font-size: 1.1em; text-shadow: 1px 1px 5px rgba(0,0,0,0.9); }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-family: 'Comfortaa';
+            font-size: 1.1em;
+            border: 1px solid rgba(255,255,255,0.4);
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.8);
+        }
+
         .versiculo { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1em; background: rgba(255,255,255,0.15); padding: 20px; border-radius: 15px; margin-top: 30px; display: inline-block; border: 1px solid rgba(255,255,255,0.3); text-shadow: 1px 1px 5px rgba(0,0,0,0.8); max-width: 90%; }
         
         /* AJUSTE DA FOTO PARA CELULAR SEM CORTAR DETALHES */
@@ -82,8 +110,20 @@
         Estamos preparando cada detalhe do nosso novo lar com muito amor, e ter vocês participando desta construção torna tudo ainda mais especial. <br>
         <strong>Obrigado por fazerem parte da nossa história!</strong>
     </div>
+
+    <!-- INFORMAÇÕES DO EVENTO (Local e Horário) -->
+    <div class="event-info">
+        <p>📅 <strong>Data:</strong> 05 de Dezembro de 2026 às 16:00h</p>
+        <p>📍 <strong>Local:</strong> Rua Marques de Valência, 121 - Jandira</p>
+    </div>
+
+    <!-- CONTADOR REGRESSIVO -->
+    <div class="countdown-box">
+        ⏳ Faltam <span id="contador">0</span> dias para a festa!
+    </div>
+
     <div class="couple-photo-container">
-        <img src="gabriel.jpg" alt="Foto do Casal Mayssa" class="couple-photo">
+        <img src="gabriel.jpg" alt="Foto do Casal" class="couple-photo">
     </div>
     <div class="versiculo">
         "Haja Paz Dentro de Teus Muros e Prosperidade Dentro dos Teus Palácio." <br>
@@ -104,6 +144,11 @@
     <div id="section-2" class="hidden">
         <button class="btn-voltar" onclick="goToSection(1)">⬅ Voltar ao início</button>
         <h2>Escolha do Item</h2>
+        
+        <div class="warning-box">
+            🎨 <strong>Preferência de Cores:</strong> Se possível, priorize itens nas cores <b>preto, branco ou cinza</b> para combinar com o nosso novo lar! ❤️
+        </div>
+
         <p><strong>Descrição:</strong> Escolha o item com que deseja abençoar o nosso lar.</p>
         <div class="warning-box">⚠️ Selecione um item e clique em Enviar. O item sairá da lista automaticamente.</div>
         <div id="giftListContainer">Carregando lista de presentes...</div>
@@ -168,11 +213,41 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // --- FUNÇÃO DO CONTADOR REGRESSIVO ---
+    function iniciarContagem() {
+        const dataCha = new Date(2026, 11, 5, 16, 0, 0); // 05 de Dezembro de 2026 às 16:00h
+        const hoje = new Date();
+        const diferenca = dataCha - hoje;
+        const dias = Math.ceil(diferenca / (1000 * 60 * 60 * 24));
+        const elemento = document.getElementById("contador");
+        if(elemento) {
+            elemento.innerText = dias > 0 ? dias : 0;
+        }
+    }
+    iniciarContagem();
+
     const categorias = {
-        "Eletrodomésticos": ["Liquidificador", "Ferro de Passar", "Sanduicheira", "Ventilador", "Cafeteira"],
-        "Utensílios de Cozinha": ["Jogo de Panelas", "Panela de Pressão", "Frigideira", "Cuscuzeira", "Faqueiro (Dia a dia)", "Kit de Conchas (Silicone)", "Jogo de Xícaras", "Jogo de Copos", "Garrafa Térmica", "Assadeira (Tabuleiro)", "Forma de Bolo", "Forma de Pão", "Tábua de Corte", "Ralador", "Potes Plásticos", "Fruteira", "Escorredor de Louça", "Abridor de Latas", "Espremedor de Alho", "Espremedor de Limão", "Peneira", "Fouet (Batedor)", "Descascador de Legumes", "Concha de Sorvete", "Forminhas de Gelo", "Saladeira", "Açucareiro e Saleiro"],
-        "Cama, Mesa e Banho": ["Jogo de Cama", "Coberta", "Edredom", "Jogo de Toalhas", "Kit Pia Banheiro", "Tapete Antiderrapante (Box)"],
-        "Limpeza e Organização": ["Kit Panos de Prato", "Panos de Chão", "Lixeira de Pia", "Lixeira de Banheiro", "Vassoura e Pá", "Rodo e Balde", "Cesto de Roupa", "Pregadores", "Tapete de Entrada", "Cabides"]
+        "Utensílios de Cozinha": [
+            "Pano de Prato (Opção 1)", "Pano de Prato (Opção 2)", "Kit de Concha (Silicone)", 
+            "Jogo de Copo (Opção 1)", "Jogo de Copo (Opção 2)", "Jogo de Xicaras (Opção 1)", "Jogo de Xicaras (Opção 2)", 
+            "Jarra de Suco Vidro", "Batedeira", "Pote Hermético (Para Mantimentos)", "Porta Temperos", 
+            "Escorredor de Louça", "Peneira", "Cuscuzeira", "Tabua de Cortar", "Liquidificador", 
+            "Panela de Pressão 3 ou 4L", "Forma Redonda e Quadrada", "Jogo de Pratos", "Porta Bolo", 
+            "Toalha de Mesa (Opção 1)", "Toalha de Mesa (Opção 2)", "Jogo de Panelas", "Ralador", 
+            "Fruteira de Mesa", "Abridor de Latas", "Açucareiro e Saleiro", "Conjunto de Assadeiras Vidro", 
+            "Garrafa Térmica (Café)", "Frigideira", "Forminha de Gelo", "Descascador de Legumes", 
+            "Saladeira", "Triturador de Alho"
+        ],
+        "Cama, Mesa e Banho": [
+            "Jogo de Cama", "Jogo de Lençol", "Coberta (Opção 1)", "Coberta (Opção 2)", 
+            "Edredom", "Jogo de Toalha de Banho", "Kit Pia Banheiro", "Tapete Antiderrapante", 
+            "Cortina Cozinha (Opção 1)", "Cortina Cozinha (Opção 2)", 
+            "Cortinha Sala (Opção 1)", "Cortinha Sala (Opção 2)", "Cabides"
+        ],
+        "Limpeza e Organização": [
+            "Lixeira de Banheiro Inox", "Lixeira de Pia Inox", "Cesto de Roupa", 
+            "Ferro de Passar", "Ventilador", "Balde", "Pregadores"
+        ]
     };
 
     let itemSelecionado = null;
